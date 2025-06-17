@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "persona-summoner": {
+      "command": "node",
+      "args": ["/path/to/persona-summoner/dist/server.js"],
+      "env": {}
+    }
+  }
+}

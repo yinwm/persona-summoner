@@ -1,0 +1,40 @@
+{
+  "name": "persona-summoner",
+  "version": "1.0.0",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx src/server.ts",
+    "package": "npm run build && pkg dist/server.js --targets node18-macos-x64,node18-win-x64,node18-linux-x64 --out-path ./releases",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "pkg": {
+    "scripts": [
+      "dist/**/*.js"
+    ],
+    "assets": []
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yinwm/persona-summoner.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yinwm/persona-summoner/issues"
+  },
+  "homepage": "https://github.com/yinwm/persona-summoner#readme",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^24.0.3",
+    "nexe": "^5.0.0-beta.4",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.3"
+  }
+}
