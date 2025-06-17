@@ -4,6 +4,8 @@ export interface Persona {
   rule: string;
   goal: string;
   version: string;
+  category?: string;
+  tags?: string[];
 }
 
 export interface PersonaRepository {

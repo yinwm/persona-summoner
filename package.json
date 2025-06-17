@@ -1,8 +1,11 @@
 {
-  "name": "persona-summoner",
+  "name": "persona-mcp-server",
   "version": "1.0.0",
   "main": "dist/server.js",
   "type": "module",
+  "bin": {
+    "persona-mcp-server": "./dist/server.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
@@ -27,7 +30,8 @@
     "url": "https://github.com/yinwm/persona-summoner/issues"
   },
   "homepage": "https://github.com/yinwm/persona-summoner#readme",
-  "description": "",
+  "description": "MCP server for summoning different AI personas with intelligent scheduling capabilities",
+  "keywords": ["mcp", "model-context-protocol", "ai", "persona", "assistant", "scheduling"],
   "devDependencies": {
     "@types/node": "^24.0.3",
     "nexe": "^5.0.0-beta.4",
