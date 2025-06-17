@@ -25,6 +25,8 @@
 }
 ```
 
+> **注意**: 无需手动安装，npx 会自动下载并运行最新版本。如果遇到依赖错误，请运行 `npx clear-npx-cache` 清除缓存。
+
 ### 2. 重启应用
 重启 Claude/Cursor/Claude Code 让配置生效。
 
