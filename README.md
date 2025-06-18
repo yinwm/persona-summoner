@@ -8,6 +8,7 @@
 - 🔧 **简单配置** - 一键安装使用
 - 🚀 **实时召唤** - 随时切换不同人格
 - 📝 **人格管理** - 支持查看和管理人格
+- 📂 **本地人格** - 支持加载自定义本地人格
 
 ## 快速开始
 
@@ -20,6 +21,19 @@
     "persona-mcp-server": {
       "command": "npx",
       "args": ["persona-mcp-server@latest"]
+    }
+  }
+}
+```
+
+如果要使用本地人格功能，可以通过 `--personas` 参数指定本地人格文件：
+
+```json
+{
+  "mcpServers": {
+    "persona-mcp-server": {
+      "command": "npx",
+      "args": ["persona-mcp-server@latest", "--personas", "./my-personas.json"]
     }
   }
 }
@@ -62,17 +76,50 @@
 
 **💡 成本控制提醒：** 系统会建议最多选择2-3个最相关的人格，避免调用过多人格造成 token 消耗过大。
 
+## 本地人格配置
+
+你可以通过创建一个 JSON 文件来定义自己的本地人格。文件格式如下：
+
+```json
+[
+  {
+    "id": "my-persona",
+    "name": "我的人格",
+    "rule": "这个人格的行为规则...",
+    "goal": "这个人格的目标...",
+    "version": "1.0.0",
+    "description": "可选的描述",
+    "category": "可选的分类",
+    "tags": ["可选的", "标签"]
+  }
+]
+```
+
+**必填字段说明：**
+- `id`: 唯一标识符
+- `name`: 人格名称
+- `rule`: 人格的行为规则
+- `goal`: 人格的目标
+- `version`: 版本号
+
+**可选字段：**
+- `description`: 详细描述
+- `category`: 分类
+- `tags`: 标签数组
+
+> **注意**: 如果本地人格的 ID 与内置人格相同，本地人格将优先生效。
+
 ## 可用工具
 
 ### `summon_persona`
 召唤指定人格来处理任务
-- `persona_name`: 人格名称（暴躁老哥、自省姐、粉丝妹）
+- `persona_name`: 人格名称（暴躁老哥、自省姐、粉丝妹，或自定义的本地人格）
 
 ### `interactive_persona`
 智能协作分析 - 根据当前对话上下文自动选择合适的人格进行逐步分析
 
 ### `list_personas`
-列出所有可用的人格
+列出所有可用的人格（包括本地人格）
 
 ### `version`
 获取当前MCP服务版本信息

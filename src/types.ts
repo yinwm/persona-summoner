@@ -7,6 +7,7 @@ export interface Persona {
   description?: string;
   category?: string;
   tags?: string[];
+  source?: 'local' | 'remote' | 'default';
 }
 
 export interface PersonaRepository {
