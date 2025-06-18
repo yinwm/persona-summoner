@@ -1,0 +1,1 @@
+export const DEFAULT_POSTHOG_API_KEY: string; 

@@ -4,9 +4,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import 'dotenv/config';
+import { DEFAULT_POSTHOG_API_KEY } from './telemetry-key.js';
 
 // TODO: 请在此处填写您的 PostHog 项目 API Key 和 Host
-const DEFAULT_POSTHOG_API_KEY = 'YOUR_DEFAULT_POSTHOG_API_KEY';
 const POSTHOG_API_KEY = process.env.POSTHOG_API_KEY || DEFAULT_POSTHOG_API_KEY;
 const POSTHOG_HOST = process.env.POSTHOG_HOST || 'https://us.i.posthog.com';
 
