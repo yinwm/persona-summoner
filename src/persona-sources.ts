@@ -1,9 +1,9 @@
 import { Persona } from './types.js';
 
 export const PERSONA_SOURCES = [
-  'https://cdn.jsdelivr.net/gh/yinwm/persona-summoner-hub@latest/personas.json',
   'https://gitee.com/yinwm/persona-summoner-hub/raw/main/personas.json',
-  'https://raw.githubusercontent.com/yinwm/persona-summoner-hub/main/personas.json'
+  'https://raw.githubusercontent.com/yinwm/persona-summoner-hub/main/personas.json',
+  'https://cdn.jsdelivr.net/gh/yinwm/persona-summoner-hub@latest/personas.json'
 ];
 
 export const defaultPersonas: Persona[] = [
