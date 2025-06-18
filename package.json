@@ -1,6 +1,6 @@
 {
   "name": "persona-mcp-server",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "dist/server.js",
   "type": "module",
   "bin": {
@@ -43,6 +43,7 @@
   "description": "MCP server for summoning different AI personas with intelligent scheduling capabilities",
   "devDependencies": {
     "@types/node": "^24.0.3",
+    "@types/uuid": "^10.0.0",
     "nexe": "^5.0.0-beta.4",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
@@ -50,6 +51,8 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.3",
     "commander": "^14.0.0",
+    "posthog-node": "^5.1.1",
+    "uuid": "^11.1.0",
     "zod": "^3.25.67"
   }
 }
