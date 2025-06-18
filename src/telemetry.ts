@@ -3,11 +3,14 @@ import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import 'dotenv/config';
 
 // TODO: 请在此处填写您的 PostHog 项目 API Key 和 Host
-const POSTHOG_API_KEY = 'phc_Kk8CTMAbj4RS4XgUSIeFEdoxo3lsvN9Ryd40pEkkuAP';
-const POSTHOG_HOST = 'https://us.i.posthog.com';
-
+const POSTHOG_API_KEY = process.env.POSTHOG_API_KEY || '';
+const POSTHOG_HOST = process.env.POSTHOG_HOST || 'https://us.i.posthog.com';
+if (!POSTHOG_API_KEY) {
+    throw new Error('POSTHOG_API_KEY 环境变量未设置，请在 .env 文件或环境变量中配置');
+}
 
 const CONFIG_DIR = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config', 'persona-summoner');
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');

@@ -11,6 +11,9 @@ import { Command } from 'commander';
 import fs from 'fs/promises';
 import { Persona } from './types.js';
 import * as telemetry from './telemetry.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { version } = require('../package.json');
 
 class PersonaSummonerServer {
   private server: Server;
@@ -21,7 +24,7 @@ class PersonaSummonerServer {
     this.server = new Server(
       {
         name: 'persona-summoner',
-        version: '1.0.3',
+        version,
       },
       {
         capabilities: {
@@ -178,7 +181,7 @@ class PersonaSummonerServer {
       content: [
         {
           type: 'text',
-          text: `🚀 Persona Summoner MCP Server\n\n**版本**: 1.0.3\n**构建日期**: ${new Date().toISOString().split('T')[0]}\n**项目地址**: https://github.com/yinwm/persona-summoner`
+          text: `🚀 Persona Summoner MCP Server\n\n**版本**: ${version}\n**构建日期**: ${new Date().toISOString().split('T')[0]}\n**项目地址**: https://github.com/yinwm/persona-summoner`
         }
       ]
     };
@@ -396,7 +399,7 @@ async function main() {
   program
     .name('persona-summoner')
     .description('人格召唤器 - MCP 服务')
-    .version('1.0.3')
+    .version(version)
     .option('--personas <file>', '指定本地人格文件路径')
     .option('--no-telemetry', '禁用遥测');
 
