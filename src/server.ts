@@ -10,6 +10,10 @@ import { RemotePersonaRepository } from './persona-repository.js';
 import { Command } from 'commander';
 import fs from 'fs/promises';
 import { Persona } from './types.js';
+import * as telemetry from './telemetry.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { version } = require('../package.json');
 
 class PersonaSummonerServer {
   private server: Server;
@@ -20,7 +24,7 @@ class PersonaSummonerServer {
     this.server = new Server(
       {
         name: 'persona-summoner',
-        version: '1.0.2',
+        version,
       },
       {
         capabilities: {
@@ -117,6 +121,18 @@ class PersonaSummonerServer {
       };
     }
 
+    // 采集 persona_summoned 事件
+    const method = 'manual'; // 目前仅支持手动，后续如有自动协同可扩展
+    const persona_ids = [persona.id];
+    const persona_sources = [persona.source || 'unknown'];
+    const persona_count = 1;
+    telemetry.trackEvent('persona_summoned', {
+      method,
+      persona_ids,
+      persona_sources,
+      persona_count
+    });
+
     const personaDetails = [
       `🎭 **${persona.name}** (${persona.id}) 已召唤！`,
       `**🎯 目标**: ${persona.goal}`,
@@ -137,10 +153,19 @@ class PersonaSummonerServer {
   private async handleListPersonas() {
     const personas = await this.repository.getAllPersonas();
     const personaList = personas.map(p => {
+      const sourceLabel = p.source === 'local'
+        ? '🏠 local'
+        : p.source === 'remote'
+          ? '☁️ remote'
+          : '📦 default';
       const tags = p.tags ? ` [${p.tags.join(', ')}]` : '';
-      return `- **${p.name}** (${p.id})${tags}\n  *${p.goal}*`;
+      return `- **${p.name}** (${p.id}) [${sourceLabel}]${tags}\n  *${p.goal}*`;
     }).join('\n\n');
-    
+    // 采集 command_executed 事件
+    telemetry.trackEvent('command_executed', {
+      command: 'list_personas',
+      personas_count: personas.length
+    });
     return {
       content: [
         {
@@ -156,7 +181,7 @@ class PersonaSummonerServer {
       content: [
         {
           type: 'text',
-          text: `🚀 Persona Summoner MCP Server\n\n**版本**: 1.0.2\n**构建日期**: ${new Date().toISOString().split('T')[0]}\n**项目地址**: https://github.com/yinwm/persona-summoner`
+          text: `🚀 Persona Summoner MCP Server\n\n**版本**: ${version}\n**构建日期**: ${new Date().toISOString().split('T')[0]}\n**项目地址**: https://github.com/yinwm/persona-summoner`
         }
       ]
     };
@@ -164,9 +189,12 @@ class PersonaSummonerServer {
 
   private async handleInteractivePersona() {
     const personas = await this.repository.getAllPersonas();
-    
     const personaList = personas.map(p => `- **${p.name}** (${p.category || '通用'}): ${p.goal}`).join('\n');
-
+    // 采集 command_executed 事件
+    telemetry.trackEvent('command_executed', {
+      command: 'interactive_persona',
+      personas_count: personas.length
+    });
     return {
       content: [
         {
@@ -226,8 +254,8 @@ function validatePersona(persona: any): ValidationResult {
         }
         break;
       case 'version':
-        if (typeof persona.version !== 'string' || !/^\d+\.\d+\.\d+$/.test(persona.version)) {
-          errors.push({ field, message: 'version 必须是有效的语义化版本号（如：1.0.0）' });
+        if (typeof persona.version !== 'string' || !/^\d+\.\d+$/.test(persona.version)) {
+          errors.push({ field, message: 'version 必须是有效的版本号（如：1.0）' });
         }
         break;
     }
@@ -371,27 +399,96 @@ async function main() {
   program
     .name('persona-summoner')
     .description('人格召唤器 - MCP 服务')
-    .version('1.0.2')
-    .option('--personas <file>', '指定本地人格文件路径');
+    .version(version)
+    .option('--personas <file>', '指定本地人格文件路径')
+    .option('--no-telemetry', '禁用遥测');
 
   program.parse();
-
   const options = program.opts();
-  let localPersonas: Persona[] = [];
 
+  // 1. 初始化遥测（支持 --no-telemetry）
+  telemetry.init({ forceDisable: options.noTelemetry });
+
+  // 2. 采集 invocation_started 事件
+  telemetry.trackEvent('invocation_started', {
+    app_version: program.version(),
+    command: process.argv[1],
+    raw_args: process.argv.slice(2),
+    is_ci: !!process.env.CI
+  });
+
+  let localPersonas: Persona[] = [];
+  let personasLoadError = null;
   if (options.personas) {
     try {
       console.error(`正在加载本地人格文件: ${options.personas}`);
       localPersonas = await loadLocalPersonas(options.personas);
+      // 修正：为所有本地人格加上 source: 'local'
+      localPersonas = localPersonas.map(p => ({ ...p, source: 'local' as const }));
       console.error(`成功加载 ${localPersonas.length} 个本地人格`);
+      // 3. 采集 personas_loaded 事件
+      telemetry.trackEvent('personas_loaded', {
+        source_types: ['local'],
+        local_count: localPersonas.length,
+        remote_count: 0,
+        total_count: localPersonas.length,
+        error_count: 0
+      });
     } catch (error) {
+      personasLoadError = error;
       console.error(`加载本地人格文件失败: ${error instanceof Error ? error.message : String(error)}`);
+      // 采集 personas_loaded 失败事件
+      telemetry.trackEvent('personas_loaded', {
+        source_types: ['local'],
+        local_count: 0,
+        remote_count: 0,
+        total_count: 0,
+        error_count: 1,
+        error_message: error instanceof Error ? error.message : String(error)
+      });
+      // 采集 invocation_failed 事件
+      telemetry.trackEvent('invocation_failed', {
+        command: process.argv[1],
+        duration_ms: 0,
+        status: 'failed',
+        error_type: 'PersonaLoadError',
+        error_message: error instanceof Error ? error.message : String(error)
+      });
+      await telemetry.shutdown();
       process.exit(1);
     }
   }
 
   const server = new PersonaSummonerServer(localPersonas);
-  server.run().catch(console.error);
+  try {
+    await server.run();
+    // 4. 采集 invocation_completed 事件
+    telemetry.trackEvent('invocation_completed', {
+      command: process.argv[1],
+      status: 'success',
+      // duration_ms 可根据需要补充
+    });
+  } catch (error) {
+    telemetry.trackEvent('invocation_failed', {
+      command: process.argv[1],
+      status: 'failed',
+      error_type: error instanceof Error ? error.name : 'UnknownError',
+      error_message: error instanceof Error ? error.message : String(error)
+    });
+    throw error;
+  } finally {
+    await telemetry.shutdown();
+  }
 }
 
-main().catch(console.error);
+main().catch(async (error) => {
+  telemetry.trackEvent('invocation_failed', {
+    command: process.argv[1],
+    status: 'failed',
+    error_type: error instanceof Error ? error.name : 'UnknownError',
+    error_message: error instanceof Error ? error.message : String(error)
+  });
+  await telemetry.shutdown();
+  console.error(error);
+  process.exit(1);
+});
