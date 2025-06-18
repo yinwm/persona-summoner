@@ -4,6 +4,7 @@ export interface Persona {
   rule: string;
   goal: string;
   version: string;
+  description?: string;
   category?: string;
   tags?: string[];
 }
@@ -11,7 +12,4 @@ export interface Persona {
 export interface PersonaRepository {
   getPersona(id: string): Promise<Persona | null>;
   getAllPersonas(): Promise<Persona[]>;
-  addPersona(persona: Persona): Promise<void>;
-  updatePersona(id: string, persona: Partial<Persona>): Promise<void>;
-  deletePersona(id: string): Promise<void>;
 }
