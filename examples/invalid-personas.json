@@ -1,0 +1,32 @@
+[
+  {
+    "id": "test-persona-1",
+    "name": "测试人格1",
+    "rule": "规则太短",
+    "goal": "目标也太短",
+    "version": "invalid"
+  },
+  {
+    "id": "test-persona-1",
+    "name": "测试人格2",
+    "rule": "这是一个足够长的规则，用于测试重复ID",
+    "goal": "这是一个足够长的目标，用于测试重复ID",
+    "version": "1.0.0"
+  },
+  {
+    "id": "invalid id with spaces",
+    "name": "",
+    "rule": "这是一个足够长的规则，用于测试无效ID",
+    "goal": "这是一个足够长的目标，用于测试无效ID",
+    "version": "1.0.0",
+    "description": 123,
+    "category": "",
+    "tags": ["valid", 123, ""]
+  },
+  {
+    "name": "缺少ID的人格",
+    "rule": "这是一个足够长的规则，用于测试缺少ID",
+    "goal": "这是一个足够长的目标，用于测试缺少ID",
+    "version": "1.0.0"
+  }
+] 

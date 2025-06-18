@@ -1,0 +1,25 @@
+[
+  {
+    "id": "valid-persona-1",
+    "name": "正确人格1",
+    "rule": "这是一个正确的规则",
+    "goal": "这是一个正确的目标",
+    "version": "1.0.0",
+    "description": "一个完全正确的人格定义"
+  },
+  {
+    "id": "invalid-persona",
+    "name": "",
+    "rule": "规则正确",
+    "goal": "目标正确",
+    "version": "invalid"
+  },
+  {
+    "id": "valid-persona-2",
+    "name": "正确人格2",
+    "rule": "这是第二个正确的规则",
+    "goal": "这是第二个正确的目标",
+    "version": "1.0.0",
+    "tags": ["测试", "示例"]
+  }
+] 
