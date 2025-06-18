@@ -7,13 +7,16 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { RemotePersonaRepository } from './persona-repository.js';
+import { Command } from 'commander';
+import fs from 'fs/promises';
+import { Persona } from './types.js';
 
 class PersonaSummonerServer {
   private server: Server;
   private repository: RemotePersonaRepository;
 
-  constructor() {
-    this.repository = new RemotePersonaRepository();
+  constructor(localPersonas: Persona[] = []) {
+    this.repository = new RemotePersonaRepository(localPersonas);
     this.server = new Server(
       {
         name: 'persona-summoner',
@@ -181,5 +184,67 @@ class PersonaSummonerServer {
   }
 }
 
-const server = new PersonaSummonerServer();
-server.run().catch(console.error);
+async function loadLocalPersonas(filePath: string): Promise<Persona[]> {
+  try {
+    const content = await fs.readFile(filePath, 'utf-8');
+    const data = JSON.parse(content);
+    
+    if (!Array.isArray(data)) {
+      throw new Error('本地人格文件必须包含一个数组');
+    }
+
+    // 验证每个人格对象的必要字段
+    const requiredFields = ['id', 'name', 'rule', 'goal', 'version'];
+    for (const persona of data) {
+      for (const field of requiredFields) {
+        if (!(field in persona)) {
+          throw new Error(`人格对象缺少必要字段: ${field}`);
+        }
+      }
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message.includes('ENOENT')) {
+        throw new Error(`找不到指定的本地人格文件: ${filePath}`);
+      }
+      if (error.message.includes('JSON')) {
+        throw new Error(`本地人格文件 JSON 格式错误: ${filePath}`);
+      }
+      throw error;
+    }
+    throw new Error(`读取本地人格文件时发生未知错误: ${String(error)}`);
+  }
+}
+
+async function main() {
+  const program = new Command();
+
+  program
+    .name('persona-summoner')
+    .description('人格召唤器 - MCP 服务')
+    .version('1.0.2')
+    .option('--personas <file>', '指定本地人格文件路径');
+
+  program.parse();
+
+  const options = program.opts();
+  let localPersonas: Persona[] = [];
+
+  if (options.personas) {
+    try {
+      console.error(`正在加载本地人格文件: ${options.personas}`);
+      localPersonas = await loadLocalPersonas(options.personas);
+      console.error(`成功加载 ${localPersonas.length} 个本地人格`);
+    } catch (error) {
+      console.error(`加载本地人格文件失败: ${error instanceof Error ? error.message : String(error)}`);
+      process.exit(1);
+    }
+  }
+
+  const server = new PersonaSummonerServer(localPersonas);
+  server.run().catch(console.error);
+}
+
+main().catch(console.error);
